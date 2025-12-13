@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-chatbot-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_chatbot
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: ai-chatbot-backend
+    env_file:
+      - apps/backend/.env
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/ai_chatbot
+      - PRISMA_CLIENT_ENGINE_TYPE=library
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./apps/backend/src:/app/apps/backend/src
+      - ./apps/backend/prisma:/app/apps/backend/prisma
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      - postgres
+    command: pnpm --filter ai-chatbot-backend dev
+
+volumes:
+  pgdata:

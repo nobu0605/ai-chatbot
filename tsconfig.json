@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/_": [
+        "packages/shared/src/_"
+      ],
+      "@ai-chatbot/shared": [
+        "packages/shared/src/index.ts"
+      ],
+      "@ai-chatbot/shared/*": [
+        "packages/shared/src/*"
+      ]
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@ai-chatbot/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types/chat": "./src/types/chat.ts",
+    "./utils/text": "./src/utils/text.ts",
+    "./_": "./src/_/index.ts"
+  },
+  "main": "src/index.ts",
+  "files": [
+    "src"
+  ]
+}

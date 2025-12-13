@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ChatRole {
+  user
+  assistant
+  system
+}
+
+enum IngestionStatus {
+  pending
+  success
+  failed
+}
+
+model ChatSession {
+  id         String        @id @default(uuid())
+  userId     String?
+  messages   ChatMessage[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id        String    @id @default(uuid())
+  session   ChatSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String?
+  role      ChatRole
+  content   String
+  metadata  Json?
+  createdAt DateTime  @default(now())
+}
+
+model RagIngestionLog {
+  id          String           @id @default(uuid())
+  sourcePath  String?
+  status      IngestionStatus
+  docCount    Int?
+  chunkCount  Int?
+  error       String?
+  createdAt   DateTime         @default(now())
+  completedAt DateTime?
+}
+
+model PromptSetting {
+  key       String   @id
+  content   String
+  metadata  Json?
+  updatedAt DateTime @updatedAt
+}

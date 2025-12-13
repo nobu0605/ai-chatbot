@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { env } from "../config/env";
 import { ChatRequest, ChatResponse } from "@ai-chatbot/shared/types/chat";
+import { Role } from "@ai-chatbot/shared";
 import { prisma } from "../db/prisma";
 
 const client = new OpenAI({
@@ -15,14 +16,14 @@ export async function getChatCompletion(
       ? await callOpenAI(request)
       : { answer: "OpenAI API key is not configured." };
 
-    await persistConversation(request, response);
-    return response;
+    const sessionId = await persistConversation(request, response);
+    return { ...response, sessionId };
   } catch (error) {
     // Best-effort persistence even when OpenAI or downstream fails
-    await persistConversation(request, {
+    const sessionId = await persistConversation(request, {
       answer: "Error generating response.",
-    }).catch(() => {});
-    throw error;
+    }).catch(() => undefined);
+    throw Object.assign(error, { sessionId });
   }
 }
 
@@ -31,7 +32,7 @@ async function callOpenAI(request: ChatRequest): Promise<ChatResponse> {
     model: "gpt-3.5-turbo",
     messages: [
       {
-        role: "user",
+        role: Role.USER,
         content: request.message,
       },
     ],
@@ -44,17 +45,38 @@ async function callOpenAI(request: ChatRequest): Promise<ChatResponse> {
 async function persistConversation(
   request: ChatRequest,
   response: ChatResponse
-) {
-  await prisma.chatSession.create({
+): Promise<string> {
+  if (request.sessionId) {
+    await prisma.chatMessage.createMany({
+      data: [
+        {
+          sessionId: request.sessionId,
+          role: Role.USER,
+          content: request.message,
+        },
+        {
+          sessionId: request.sessionId,
+          role: Role.ASSISTANT,
+          content: response.answer,
+          metadata: response.sources
+            ? { sources: response.sources }
+            : undefined,
+        },
+      ],
+    });
+    return request.sessionId;
+  }
+
+  const session = await prisma.chatSession.create({
     data: {
       messages: {
         create: [
           {
-            role: "user",
+            role: Role.USER,
             content: request.message,
           },
           {
-            role: "assistant",
+            role: Role.ASSISTANT,
             content: response.answer,
             metadata: response.sources
               ? { sources: response.sources }
@@ -63,5 +85,7 @@ async function persistConversation(
         ],
       },
     },
+    select: { id: true },
   });
+  return session.id;
 }

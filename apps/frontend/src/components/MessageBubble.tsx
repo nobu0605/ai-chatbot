@@ -1,5 +1,5 @@
 import { Message } from "../hooks/useChat";
-import { Role } from "../constants/message";
+import { Role } from "@ai-chatbot/shared";
 
 interface Props {
   message: Message;

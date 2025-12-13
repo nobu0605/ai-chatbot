@@ -3,7 +3,7 @@ import {
   ChatMessageDTO,
   ChatResponse,
 } from "@ai-chatbot/shared/types/chat";
-import { Role } from "../constants/message";
+import { Role } from "@ai-chatbot/shared";
 
 export type MessageRole = (typeof Role)[keyof typeof Role];
 
@@ -37,7 +37,7 @@ export function useChat({ sessionId: initialSessionId }: UseChatParams = {}) {
         setMessages(
           data.messages.map((m) => ({
             id: m.id,
-            role: (m.role === "assistant" ? "assistant" : "user") as MessageRole,
+            role: (m.role === Role.ASSISTANT ? Role.ASSISTANT : Role.USER) as MessageRole,
             content: m.content,
           }))
         );

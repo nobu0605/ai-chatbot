@@ -3,6 +3,7 @@ import {
   ChatMessageDTO,
   ChatRequest,
 } from "@ai-chatbot/shared/types/chat";
+import { Role } from "@ai-chatbot/shared";
 import { getChatCompletion } from "../services/openaiService";
 import { prisma } from "../db/prisma";
 
@@ -33,7 +34,7 @@ router.get("/chat/:sessionId", async (req, res, next) => {
     const result: ChatMessageDTO[] = messages.map((m) => ({
       id: m.id,
       sessionId: m.sessionId,
-      role: m.role as ChatMessageDTO["role"],
+      role: (m.role as typeof Role[keyof typeof Role]) ?? Role.SYSTEM,
       content: m.content,
       metadata: m.metadata ?? undefined,
       createdAt: m.createdAt.toISOString(),

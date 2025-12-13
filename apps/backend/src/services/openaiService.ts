@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { env } from "../config/env";
 import { ChatRequest, ChatResponse } from "@ai-chatbot/shared/types/chat";
+import { Role } from "@ai-chatbot/shared";
 import { prisma } from "../db/prisma";
 
 const client = new OpenAI({
@@ -31,7 +32,7 @@ async function callOpenAI(request: ChatRequest): Promise<ChatResponse> {
     model: "gpt-3.5-turbo",
     messages: [
       {
-        role: "user",
+        role: Role.USER,
         content: request.message,
       },
     ],
@@ -50,12 +51,12 @@ async function persistConversation(
       data: [
         {
           sessionId: request.sessionId,
-          role: "user",
+          role: Role.USER,
           content: request.message,
         },
         {
           sessionId: request.sessionId,
-          role: "assistant",
+          role: Role.ASSISTANT,
           content: response.answer,
           metadata: response.sources
             ? { sources: response.sources }
@@ -71,11 +72,11 @@ async function persistConversation(
       messages: {
         create: [
           {
-            role: "user",
+            role: Role.USER,
             content: request.message,
           },
           {
-            role: "assistant",
+            role: Role.ASSISTANT,
             content: response.answer,
             metadata: response.sources
               ? { sources: response.sources }

@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./types/chat": "./src/types/chat.ts",
     "./utils/text": "./src/utils/text.ts",
+    "./constants/role": "./src/constants/role.ts",
     "./_": "./src/_/index.ts"
   },
   "main": "src/index.ts",

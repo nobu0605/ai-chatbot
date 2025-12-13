@@ -1,18 +1,45 @@
 import { Router } from "express";
-import { ChatRequest } from "@ai-chatbot/shared/types/chat";
+import {
+  ChatMessageDTO,
+  ChatRequest,
+} from "@ai-chatbot/shared/types/chat";
 import { getChatCompletion } from "../services/openaiService";
+import { prisma } from "../db/prisma";
 
 const router = Router();
 
 router.post("/chat", async (req, res, next) => {
-  const { message } = req.body as Partial<ChatRequest>;
+  const { message, sessionId } = req.body as Partial<ChatRequest>;
   if (!message) {
     return res.status(400).json({ error: "message is required" });
   }
 
   try {
-    const response = await getChatCompletion({ message });
+    const response = await getChatCompletion({ message, sessionId });
     res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/chat/:sessionId", async (req, res, next) => {
+  const { sessionId } = req.params;
+  try {
+    const messages = await prisma.chatMessage.findMany({
+      where: { sessionId },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const result: ChatMessageDTO[] = messages.map((m) => ({
+      id: m.id,
+      sessionId: m.sessionId,
+      role: m.role as ChatMessageDTO["role"],
+      content: m.content,
+      metadata: m.metadata ?? undefined,
+      createdAt: m.createdAt.toISOString(),
+    }));
+
+    res.json({ messages: result });
   } catch (error) {
     next(error);
   }

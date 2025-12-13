@@ -2,8 +2,14 @@ import ChatWindow from "./components/ChatWindow";
 import MessageInput from "./components/MessageInput";
 import { useChat } from "./hooks/useChat";
 
-export default function App() {
-  const { messages, input, setInput, sendMessage, loading } = useChat();
+interface AppProps {
+  sessionId?: string;
+}
+
+export default function App({ sessionId }: AppProps) {
+  const { messages, input, setInput, sendMessage, loading } = useChat({
+    sessionId,
+  });
 
   return (
     <div
@@ -38,9 +44,6 @@ export default function App() {
         >
           <div>
             <h1 style={{ margin: 0, fontSize: "24px" }}>AI Chatbot</h1>
-            <p style={{ margin: 0, color: "#6b7280" }}>
-              Powered by your backend API
-            </p>
           </div>
         </header>
 

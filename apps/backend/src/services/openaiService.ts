@@ -15,14 +15,14 @@ export async function getChatCompletion(
       ? await callOpenAI(request)
       : { answer: "OpenAI API key is not configured." };
 
-    await persistConversation(request, response);
-    return response;
+    const sessionId = await persistConversation(request, response);
+    return { ...response, sessionId };
   } catch (error) {
     // Best-effort persistence even when OpenAI or downstream fails
-    await persistConversation(request, {
+    const sessionId = await persistConversation(request, {
       answer: "Error generating response.",
-    }).catch(() => {});
-    throw error;
+    }).catch(() => undefined);
+    throw Object.assign(error, { sessionId });
   }
 }
 
@@ -44,8 +44,29 @@ async function callOpenAI(request: ChatRequest): Promise<ChatResponse> {
 async function persistConversation(
   request: ChatRequest,
   response: ChatResponse
-) {
-  await prisma.chatSession.create({
+): Promise<string> {
+  if (request.sessionId) {
+    await prisma.chatMessage.createMany({
+      data: [
+        {
+          sessionId: request.sessionId,
+          role: "user",
+          content: request.message,
+        },
+        {
+          sessionId: request.sessionId,
+          role: "assistant",
+          content: response.answer,
+          metadata: response.sources
+            ? { sources: response.sources }
+            : undefined,
+        },
+      ],
+    });
+    return request.sessionId;
+  }
+
+  const session = await prisma.chatSession.create({
     data: {
       messages: {
         create: [
@@ -63,5 +84,7 @@ async function persistConversation(
         ],
       },
     },
+    select: { id: true },
   });
+  return session.id;
 }

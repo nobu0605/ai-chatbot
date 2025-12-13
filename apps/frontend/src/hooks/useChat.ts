@@ -1,5 +1,8 @@
-import { useMemo, useState } from "react";
-import { ChatResponse } from "@ai-chatbot/shared/types/chat";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ChatMessageDTO,
+  ChatResponse,
+} from "@ai-chatbot/shared/types/chat";
 import { Role } from "../constants/message";
 
 export type MessageRole = (typeof Role)[keyof typeof Role];
@@ -10,12 +13,40 @@ export interface Message {
   content: string;
 }
 
-export function useChat() {
+interface UseChatParams {
+  sessionId?: string;
+}
+
+export function useChat({ sessionId: initialSessionId }: UseChatParams = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(
+    initialSessionId
+  );
 
   const apiBaseUrl = useMemo(() => import.meta.env.VITE_API_BASE_URL ?? "", []);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/chat/${sessionId}`);
+        if (!res.ok) return;
+        const data = (await res.json()) as { messages: ChatMessageDTO[] };
+        setMessages(
+          data.messages.map((m) => ({
+            id: m.id,
+            role: (m.role === "assistant" ? "assistant" : "user") as MessageRole,
+            content: m.content,
+          }))
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMessages();
+  }, [apiBaseUrl, sessionId]);
 
   const sendMessage = async () => {
     const trimmed = input.trim();
@@ -37,7 +68,7 @@ export function useChat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({ message: trimmed, sessionId }),
       });
 
       if (!response.ok) {
@@ -45,6 +76,9 @@ export function useChat() {
       }
 
       const data = (await response.json()) as ChatResponse;
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
 
       const botMessage: Message = {
         id: crypto.randomUUID(),

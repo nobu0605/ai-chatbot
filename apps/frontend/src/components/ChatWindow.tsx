@@ -8,27 +8,13 @@ interface Props {
 
 export default function ChatWindow({ messages, loading }: Props) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        padding: '16px',
-        background: '#f8fafc',
-        borderRadius: '16px',
-        height: '60vh',
-        overflowY: 'auto',
-        border: '1px solid #e2e8f0'
-      }}
-    >
+    <div className="flex flex-col gap-3 p-4 bg-slate-50 rounded-xl h-[60vh] overflow-y-auto border border-slate-200">
       {messages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}
-      {loading ? (
-        <div style={{ color: '#6b7280', fontSize: '14px' }}>AI is thinking...</div>
-      ) : null}
+      {loading ? <div className="text-sm text-slate-500">AI is thinking...</div> : null}
       {!messages.length && !loading ? (
-        <div style={{ color: '#9ca3af', textAlign: 'center', marginTop: 'auto' }}>
+        <div className="text-center text-slate-400 mt-auto">
           Start the conversation by sending a message.
         </div>
       ) : null}

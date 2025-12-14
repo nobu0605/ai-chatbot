@@ -7,18 +7,12 @@ interface Props {
 
 export default function MessageInput({ value, onChange, onSend, loading }: Props) {
   return (
-    <div style={{ display: 'flex', gap: '12px' }}>
+    <div className="flex gap-3">
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Type your message..."
-        style={{
-          flex: 1,
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          outline: 'none'
-        }}
+        className="flex-1 rounded-xl border border-slate-200 px-3 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -30,15 +24,7 @@ export default function MessageInput({ value, onChange, onSend, loading }: Props
       <button
         onClick={onSend}
         disabled={loading || !value.trim()}
-        style={{
-          padding: '12px 18px',
-          background: '#2563eb',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '12px',
-          cursor: loading || !value.trim() ? 'not-allowed' : 'pointer',
-          opacity: loading || !value.trim() ? 0.6 : 1
-        }}
+        className="rounded-xl bg-blue-600 px-4 py-3 text-white font-medium shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? 'Sending...' : 'Send'}
       </button>

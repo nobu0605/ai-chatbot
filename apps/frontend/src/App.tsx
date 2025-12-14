@@ -12,38 +12,11 @@ export default function App({ sessionId }: AppProps) {
   });
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0ea5e9 0%, #312e81 100%)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "40px 16px",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          width: "min(960px, 100%)",
-          background: "#fff",
-          borderRadius: "20px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
-          padding: "24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-        }}
-      >
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+    <div className="min-h-screen bg-gradient-to-br from-sky-400 to-indigo-900 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-6 flex flex-col gap-4">
+        <header className="flex items-center justify-between">
           <div>
-            <h1 style={{ margin: 0, fontSize: "24px" }}>AI Chatbot</h1>
+            <h1 className="m-0 text-2xl font-semibold text-slate-900">AI Chatbot</h1>
           </div>
         </header>
 
